@@ -137,5 +137,49 @@ class Usuarios {
             ];
         }
     }
+
+    public static function login($email, $senha) {
+        $tabela = "usuarios";
+        $conexao = new PDO(dbDrive . ':host=' . dbEndereco . '; dbname=' . dbNome , dbUsuario , dbSenha);
+
+        $sql = "SELECT * FROM $tabela WHERE email = :email LIMIT 1";
+        $stm = $conexao->prepare($sql);
+        $stm->bindValue(':email', $email);
+
+        $stm->execute();
+
+        if ($stm->rowCount() > 0) {
+            $usuario = $stm->fetch(PDO::FETCH_ASSOC);
+
+            // Senha simples (sem hash)
+            if ($usuario['senha'] === $senha) {
+
+                // Remove senha do retorno
+                unset($usuario['senha']);
+
+                return [
+                    'erro' => false,
+                    'mensagem' => 'Login realizado com sucesso',
+                    'dados' => $usuario
+                ];
+            } else {
+                return [
+                    'erro' => true,
+                    'mensagem' => 'Senha incorreta',
+                    'dados' => []
+                ];
+            }
+        } else {
+            return [
+                'erro' => true,
+                'mensagem' => 'Email não encontrado',
+                'dados' => []
+            ];
+        }
 }
+
+
+}
+
+
 ?>
